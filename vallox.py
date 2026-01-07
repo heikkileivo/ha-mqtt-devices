@@ -4,11 +4,11 @@ Vallox Digit SE Communication Library for Python
 This module provides serial communication with Vallox air conditioning units.
 Based on the original Arduino implementation by Toni Korhonen.
 """
-
-import serial
 import time
 from typing import Optional, Callable, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+import serial
+from device import Device
 from vallox_protocol import *
 
 
@@ -18,8 +18,7 @@ class ValueWithTimestamp:
     value: Any = None
     last_received: float = 0.0
 
-
-class Vallox:
+class Vallox(Device):
     """
     Vallox Digit SE serial communication handler
     
@@ -30,7 +29,7 @@ class Vallox:
     https://github.com/kotope/valloxesp/tree/master
     """
     
-    def __init__(self, port: str = "/dev/ttyUSB0", baudrate: int = 9600, debug: bool = False):
+    def __init__(self, port: str = "/dev/ttyUSB0", baudrate: int = 9600, debug: bool = False, **kwargs):
         """
         Initialize Vallox communication
         
@@ -39,6 +38,7 @@ class Vallox:
             baudrate: Serial baudrate (default: 9600)
             debug: Enable debug mode
         """
+        super().__init__(**kwargs)
         self.port = port
         self.baudrate = baudrate
         self._debug = debug
