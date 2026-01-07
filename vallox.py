@@ -582,7 +582,6 @@ class Vallox(Device):
             self.full_init_done = self._is_status_init_done()
             if self.full_init_done:
                 for k, _ in self.data.items():
-                    print(f"Calling status changed for {k}")
                     self._call_status_changed(k)
 
     def _decode_status(self, status: int):
@@ -890,7 +889,8 @@ class Vallox(Device):
     def _call_status_changed(self, name: str):
         """Call status changed callback if set"""
         values = {**self.data, **self.settings}
-        value = values[name].value
+        value = values[name]
+        value = value.value if isinstance(value, ValueWithTimestamp) else value
         self.on_property_changed(name, value)
         if self.status_changed_callback:
             self.status_changed_callback(name)
