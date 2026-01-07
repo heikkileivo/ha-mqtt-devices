@@ -913,9 +913,7 @@ async def poll_device(state: LoopState, device: Vallox):
         print("Connected to Vallox device.")
 
     while not state.stop.is_set():
-        print("Polling device for changes...")
         device.loop()
-        print(f"Outside temp: {device.outside_temp}")
         await asyncio.sleep(0.1)
     print("Polling task stopped.")
 
