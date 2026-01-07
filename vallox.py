@@ -61,20 +61,19 @@ class Vallox(Device):
             'is_filter': ValueWithTimestamp(),
             'is_heating': ValueWithTimestamp(),
             'is_fault': ValueWithTimestamp(),
-            'is_service': ValueWithTimestamp(),
-            'is_summer_mode': ValueWithTimestamp(),
-            'is_error': ValueWithTimestamp(),
-            'is_in_motor': ValueWithTimestamp(),
+            'is_service_needed': ValueWithTimest            'is_summer_mode': ValueWithTimestamp(),
+            'is_error_relay': ValueWithTimestamp(),
+            'is_motor_in': ValueWithTimestamp(),
             'is_front_heating': ValueWithTimestamp(),
-            'is_out_motor': ValueWithTimestamp(),
+            'is_motor_out': ValueWithTimestamp(),
             'is_extra_func': ValueWithTimestamp(),
             'is_switch_active': ValueWithTimestamp(),
 
             # Temperature values
-            't_outside': ValueWithTimestamp(),
-            't_inside': ValueWithTimestamp(),
-            't_exhaust': ValueWithTimestamp(),
-            't_incoming': ValueWithTimestamp(),
+            'outside_temp': ValueWithTimestamp(),
+            'inside_temp': ValueWithTimestamp(),
+            'exhaust_temp': ValueWithTimestamp(),
+            'incoming_temp': ValueWithTimestamp(),
 
             # Other sensor values
             'rh1': ValueWithTimestamp(),
@@ -193,90 +192,90 @@ class Vallox(Device):
     @temperature(unit="°C")
     def inside_temp(self) -> int:
         """Get inside temperature in Celsius"""
-        return self.data['t_inside'].value if self.data['t_inside'].value is not None else vp.NOT_SET
+        return self.data['inside_temp'].value if self.data['inside_temp'].value is not None else 0
 
     @temperature(unit="°C")
     def outside_temp(self) -> int:
         """Get outside temperature in Celsius"""
-        return self.data['t_outside'].value if self.data['t_outside'].value is not None else vp.NOT_SET
+        return self.data['outside_temp'].value if self.data['outside_temp'].value is not None else 0
 
     @temperature(unit="°C")
     def incoming_temp(self) -> int:
         """Get incoming air temperature in Celsius"""
-        return self.data['t_incoming'].value if self.data['t_incoming'].value is not None else vp.NOT_SET
+        return self.data['incoming_temp'].value if self.data['incoming_temp'].value is not None else 0
 
     @temperature(unit="°C")
     def exhaust_temp(self) -> int:
         """Get exhaust air temperature in Celsius"""
-        return self.data['t_exhaust'].value if self.data['t_exhaust'].value is not None else vp.NOT_SET
+        return self.data['exhaust_temp'].value if self.data['exhaust_temp'].value is not None else 0
 
     @property
-    def on(self) -> bool:
+    def is_on(self) -> bool:
         """Check if unit is powered on"""
         return self.data['is_on'].value or False
 
     @property
-    def rh_mode(self) -> bool:
+    def is_rh_mode(self) -> bool:
         """Check if RH (humidity) mode is active"""
         return self.data['is_rh_mode'].value or False
 
     @property
-    def heating_mode(self) -> bool:
+    def is_heating_mode(self) -> bool:
         """Check if heating mode is active"""
         return self.data['is_heating_mode'].value or False
 
     @property
-    def summer_mode(self) -> bool:
+    def is_summer_mode(self) -> bool:
         """Check if summer mode is active"""
         return self.data['is_summer_mode'].value or False
 
     @property
-    def error_relay(self) -> bool:
+    def is_error_relay(self) -> bool:
         """Check if error relay is active"""
-        return self.data['is_error'].value or False
+        return self.data['is_error_relay'].value or False
 
     @property
-    def motor_in(self) -> bool:
+    def is_motor_in(self) -> bool:
         """Check if intake motor is running"""
-        return self.data['is_in_motor'].value or False
+        return self.data['is_motor_in'].value or False
 
     @property
-    def front_heating(self) -> bool:
+    def is_front_heating(self) -> bool:
         """Check if front heating is active"""
         return self.data['is_front_heating'].value or False
 
     @property
-    def motor_out(self) -> bool:
+    def is_motor_out(self) -> bool:
         """Check if exhaust motor is running"""
-        return self.data['is_out_motor'].value or False
+        return self.data['is_motor_out'].value or False
 
     @property
-    def extra_func(self) -> bool:
+    def is_extra_func(self) -> bool:
         """Check if extra function is active"""
         return self.data['is_extra_func'].value or False
 
     @property
-    def filter(self) -> bool:
+    def is_filter(self) -> bool:
         """Check if filter warning is active"""
         return self.data['is_filter'].value or False
 
     @property
-    def heating(self) -> bool:
+    def is_heating(self) -> bool:
         """Check if heating is active"""
         return self.data['is_heating'].value or False
 
     @property
-    def fault(self) -> bool:
+    def is_fault(self) -> bool:
         """Check if fault is present"""
         return self.data['is_fault'].value or False
 
     @property
-    def service_needed(self) -> bool:
+    def is_service_needed(self) -> bool:
         """Check if service is needed"""
-        return self.data['is_service'].value or False
+        return self.data['is_service_needed'].value or False
 
     @property
-    def switch_active(self) -> bool:
+    def is_switch_active(self) -> bool:
         """Check if boost/fireplace switch is active"""
         return self.data['is_switch_active'].value or False
 
@@ -521,13 +520,13 @@ class Vallox(Device):
 
         # Temperature variables
         if variable == vp.VX_VARIABLE_T_OUTSIDE:
-            self._check_status_change('t_outside', self._ntc_to_cel(value))
+            self._check_status_change('outside_temp', self._ntc_to_cel(value))
         elif variable == vp.VX_VARIABLE_T_EXHAUST:
-            self._check_status_change('t_exhaust', self._ntc_to_cel(value))
+            self._check_status_change('exhaust_temp', self._ntc_to_cel(value))
         elif variable == vp.VX_VARIABLE_T_INSIDE:
-            self._check_status_change('t_inside', self._ntc_to_cel(value))
+            self._check_status_change('inside_temp', self._ntc_to_cel(value))
         elif variable == vp.VX_VARIABLE_T_INCOMING:
-            self._check_status_change('t_incoming', self._ntc_to_cel(value))
+            self._check_status_change('incoming_temp', self._ntc_to_cel(value))
 
         # RH variables
         elif variable == vp.VX_VARIABLE_RH1:
@@ -594,7 +593,7 @@ class Vallox(Device):
         self.data['is_filter'].last_received = now
         self.data['is_heating'].last_received = now
         self.data['is_fault'].last_received = now
-        self.data['is_service'].last_received = now
+        self.data['is_service_needed'].last_received = now
 
         self.data['status'].value = status
         self.data['status'].last_received = now
@@ -611,7 +610,7 @@ class Vallox(Device):
                                  (status & vp.VX_STATUS_FLAG_HEATING) != 0)
         self._check_status_change('is_fault', 
                                  (status & vp.VX_STATUS_FLAG_FAULT) != 0)
-        self._check_status_change('is_service', 
+        self._check_status_change('is_service_needed', 
                                  (status & vp.VX_STATUS_FLAG_SERVICE) != 0)
 
         self.status_mutex = False
@@ -621,10 +620,10 @@ class Vallox(Device):
         now = time.monotonic()
 
         self.data['is_summer_mode'].last_received = now
-        self.data['is_error'].last_received = now
-        self.data['is_in_motor'].last_received = now
+        self.data['is_error_relay'].last_received = now
+        self.data['is_motor_in'].last_received = now
         self.data['is_front_heating'].last_received = now
-        self.data['is_out_motor'].last_received = now
+        self.data['is_motor_out'].last_received = now
         self.data['is_extra_func'].last_received = now
 
         self.data['variable08'].value = variable08
@@ -632,13 +631,13 @@ class Vallox(Device):
 
         self._check_status_change('is_summer_mode', 
                                  (variable08 & vp.VX_08_FLAG_SUMMER_MODE) != 0)
-        self._check_status_change('is_error', 
+        self._check_status_change('is_error_relay', 
                                  (variable08 & vp.VX_08_FLAG_ERROR_RELAY) != 0)
-        self._check_status_change('is_in_motor', 
+        self._check_status_change('is_motor_in', 
                                  (variable08 & vp.VX_08_FLAG_MOTOR_IN) != 0)
         self._check_status_change('is_front_heating', 
                                  (variable08 & vp.VX_08_FLAG_FRONT_HEATING) != 0)
-        self._check_status_change('is_out_motor', 
+        self._check_status_change('is_motor_out', 
                                  (variable08 & vp.VX_08_FLAG_MOTOR_OUT) != 0)
         self._check_status_change('is_extra_func', 
                                  (variable08 & vp.VX_08_FLAG_EXTRA_FUNC) != 0)
@@ -842,10 +841,10 @@ class Vallox(Device):
 
     def _is_temperature_init_done(self) -> bool:
         """Check if all temperatures have been received"""
-        return (self.data['t_outside'].last_received and
-                self.data['t_inside'].last_received and
-                self.data['t_exhaust'].last_received and
-                self.data['t_incoming'].last_received)
+        return (self.data['outside_temp'].last_received and
+                self.data['inside_temp'].last_received and
+                self.data['exhaust_temp'].last_received and
+                self.data['incoming_temp'].last_received)
 
     def _is_status_init_done(self) -> bool:
         """Check if all status values have been received"""
@@ -856,7 +855,7 @@ class Vallox(Device):
                 self.data['is_filter'].last_received and
                 self.data['is_heating'].last_received and
                 self.data['is_fault'].last_received and
-                self.data['is_service'].last_received and
+                self.data['is_service_needed'].last_received and
                 self.data['fan_speed'].last_received and
                 self.data['default_fan_speed'].last_received and
                 self.data['service_period'].last_received and
