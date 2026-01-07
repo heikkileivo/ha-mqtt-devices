@@ -582,6 +582,7 @@ class Vallox(Device):
             self.full_init_done = self._is_status_init_done()
             if self.full_init_done:
                 for k, _ in self.data.items():
+                    print(f"Calling status changed for {k}")
                     self._call_status_changed(k)
 
     def _decode_status(self, status: int):
