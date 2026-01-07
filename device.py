@@ -1,7 +1,7 @@
 """
 MQTT discovery for Home Assistant integration.
 """
-from typing import Tuple, Optional
+from typing import List, Tuple, Optional
 import os
 from os import environ as env
 
@@ -12,7 +12,7 @@ class DeviceId:
     """
     _index : int = 0
     _is_initialized : bool = False
-    _ids : list[str] = []
+    _ids : List[str] = []
 
     """ Class initializer to load existing IDs from file. """
     @classmethod
