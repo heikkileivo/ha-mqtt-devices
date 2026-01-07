@@ -817,7 +817,8 @@ class Vallox(Device):
 
     def _check_status_change(self, name: str, new_value: Any):
         """Check and update status field if changed"""
-        data_field = self.data[name]
+        values = {**self.data, **self.settings}
+        data_field = values[name]
         if data_field.value != new_value:
             data_field.value = new_value
             self.data['updated'] = time.monotonic()
@@ -887,7 +888,8 @@ class Vallox(Device):
 
     def _call_status_changed(self, name: str):
         """Call status changed callback if set"""
-        value = self.data[name].value
+        values = {**self.data, **self.settings}
+        value = values[name].value
         self.on_property_changed(name, value)
         if self.status_changed_callback:
             self.status_changed_callback(name)
