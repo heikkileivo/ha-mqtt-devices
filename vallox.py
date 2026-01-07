@@ -533,7 +533,7 @@ class Vallox(Device):
         elif variable == vp.VX_VARIABLE_RH1:
             self._check_status_change('rh1', self._hex_to_rh(value))
         elif variable == vp.VX_VARIABLE_RH2:
-            self._check_status_change('rh2', self._hex_to_rh(value), now)
+            self._check_status_change('rh2', self._hex_to_rh(value))
 
         # CO2 variables
         elif variable == vp.VX_VARIABLE_CO2_HI:
@@ -822,7 +822,6 @@ class Vallox(Device):
             data_field.value = new_value
             self.data['updated'] = time.monotonic()
             if self.full_init_done:
-                self.on_property_changed(name, new_value)
                 self._call_status_changed(name)
 
     def _check_value_change(self, name: str, new_value: Any):
@@ -888,6 +887,8 @@ class Vallox(Device):
 
     def _call_status_changed(self, name: str):
         """Call status changed callback if set"""
+        value = self.data[name].value
+        self.on_property_changed(name, value)
         if self.status_changed_callback:
             self.status_changed_callback(name)
 
