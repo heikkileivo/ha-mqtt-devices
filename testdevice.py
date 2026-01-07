@@ -19,7 +19,7 @@ class TestDevice(Device):
     def name(self) -> str:
         """Return the name of the device."""
         return self._name
-    
+
     @name.setter
     def name(self, value: str):
         """Set the name of the device."""
@@ -29,12 +29,12 @@ class TestDevice(Device):
     def temperature(self) -> float:
         """Return the temperature value."""
         return self._temperature
-    
+
     @temperature.setter
     def temperature(self, value: float):
         """Set the temperature value."""
         self._temperature = value
-    
+
     @number(min=0, max=10, step=1)
     def speed(self) -> float:
         """Return the speed value."""
@@ -51,7 +51,7 @@ async def poll_device(state: LoopState, device: TestDevice):
     while not state.stop.is_set():
         # Placeholder for polling logic
         device.temperature += 0.1  # Simulate temperature change
-            
+
         print("Polling device...")
         await asyncio.sleep(5)  # Simulate polling 
     print("Polling task stopped.")
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     load_dotenv()
     td = TestDevice(root_topic="test_devices", 
                     device_id="test_device_1")
-    
+
     print(type(TestDevice.speed))
     print(type(TestDevice.temperature))
     print(f"Temperature: {td.temperature} °C")
