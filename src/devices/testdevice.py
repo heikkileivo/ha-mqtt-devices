@@ -1,7 +1,10 @@
 """Example test device implementation."""
 
 import asyncio
-from core import Device, number, temperature
+from core import Device
+from core.controls import number, switch
+from core.sensors import temperature
+from core.sensors import binary
 from core import LoopState
 
 class TestDevice(Device):
@@ -14,6 +17,7 @@ class TestDevice(Device):
         self._name = "foo"
         self._temperature = 25.0
         self._speed = 0.0
+        self._power_state = False
 
     @property
     def name(self) -> str:
@@ -34,6 +38,7 @@ class TestDevice(Device):
     def temperature(self, value: float):
         """Set the temperature value."""
         self._temperature = value
+        self.on_property_changed("is_even_temperature", self.is_even_temperature)
 
     @number(min_value=0, max_value=10, step=1, display_name="Speed")
     def speed(self) -> float:
@@ -45,12 +50,30 @@ class TestDevice(Device):
         """Set the speed value."""
         self._speed = value
 
+    @switch(display_name="Power State")
+    def power_state(self) -> bool:
+        """Return the power state."""
+        return self._power_state
+    
+    @power_state.setter
+    def power_state(self, value: bool):
+        """Set the power state."""
+        self._power_state = value
+
+    @binary(display_name="Is Even Temperature", device_class="connectivity")
+    def is_even_temperature(self) -> bool:
+        """Return True if the temperature is even."""
+        return int(self._temperature) % 2 == 0
+
+
+
 async def poll_device(state: LoopState, device: TestDevice):
     """Poll data from the device."""
     print("Starting polling task...")
     while not state.stop.is_set():
         # Placeholder for polling logic
-        device.temperature += 0.1  # Simulate temperature change
+        if device.power_state:
+            device.temperature += 0.1  # Simulate temperature change
 
         print("Polling device...")
         await asyncio.sleep(5)  # Simulate polling 

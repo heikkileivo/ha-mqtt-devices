@@ -10,7 +10,10 @@ from typing import Optional, Callable, Any
 from dataclasses import dataclass
 from os import environ as env
 import serial
-from core import Device, number, temperature
+from core import Device
+from core.controls import number
+from core.sensors import temperature
+from core.sensors import binary
 from core import LoopState
 from . import vallox_protocol as vp
 
@@ -210,7 +213,7 @@ class Vallox(Device):
         """Get exhaust air temperature in Celsius"""
         return self.data['exhaust_temp'].value if self.data['exhaust_temp'].value is not None else 0
 
-    @property
+    @binary(display_name="Unit Power State", device_class="power")
     def is_on(self) -> bool:
         """Check if unit is powered on"""
         return self.data['is_on'].value or False
@@ -220,7 +223,7 @@ class Vallox(Device):
         """Check if RH (humidity) mode is active"""
         return self.data['is_rh_mode'].value or False
 
-    @property
+    @binary(display_name="Heating Mode Active", device_class="heat")
     def is_heating_mode(self) -> bool:
         """Check if heating mode is active"""
         return self.data['is_heating_mode'].value or False
@@ -235,47 +238,47 @@ class Vallox(Device):
         """Check if error relay is active"""
         return self.data['is_error_relay'].value or False
 
-    @property
+    @binary(display_name="Intake Motor Running", device_class="power")
     def is_motor_in(self) -> bool:
         """Check if intake motor is running"""
         return self.data['is_motor_in'].value or False
 
-    @property
+    @binary(display_name="Front Heating Active", device_class="heat")
     def is_front_heating(self) -> bool:
         """Check if front heating is active"""
         return self.data['is_front_heating'].value or False
 
-    @property
+    @binary(display_name="Exhaust Motor Running", device_class="power")
     def is_motor_out(self) -> bool:
         """Check if exhaust motor is running"""
         return self.data['is_motor_out'].value or False
 
-    @property
+    @binary(display_name="Extra Function Active", device_class="power")
     def is_extra_func(self) -> bool:
         """Check if extra function is active"""
         return self.data['is_extra_func'].value or False
 
-    @property
+    @binary(display_name="Filter Warning", device_class="problem")
     def is_filter(self) -> bool:
         """Check if filter warning is active"""
         return self.data['is_filter'].value or False
 
-    @property
+    @binary(display_name="Heating Active", device_class="heat")
     def is_heating(self) -> bool:
         """Check if heating is active"""
         return self.data['is_heating'].value or False
 
-    @property
+    @binary(display_name="Fault Present", device_class="problem")
     def is_fault(self) -> bool:
         """Check if fault is present"""
         return self.data['is_fault'].value or False
 
-    @property
+    @binary(display_name="Service Needed", device_class="problem")
     def is_service_needed(self) -> bool:
         """Check if service is needed"""
         return self.data['is_service_needed'].value or False
 
-    @property
+    @binary(display_name="Boost/Fireplace Switch Active", device_class="power")
     def is_switch_active(self) -> bool:
         """Check if boost/fireplace switch is active"""
         return self.data['is_switch_active'].value or False
