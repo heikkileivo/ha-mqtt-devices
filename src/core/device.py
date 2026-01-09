@@ -55,6 +55,7 @@ class DeviceProperty(property):
         self._name: str = ""
         self.parent = None
         self.display_name: Optional[str] = None
+        self.type: Optional[type] = None
 
     @property
     def is_read_only(self) -> bool:
@@ -70,7 +71,15 @@ class DeviceProperty(property):
             if instance is None: 
                 break
 
-    def meta(self, _device: "Device") -> dict:
+    def serialize(self, value) -> str:
+        """Serialize the property value to a string."""
+        return str(value)
+
+    def parse(self, value: str):
+        """Parse the property value from a string."""
+        return self.type(value) if self.type else value
+
+    def discovery_payload(self, _device: "Device") -> dict:
         """Return metadata for temperature property."""
         return {}
 
@@ -99,106 +108,6 @@ class DeviceProperty(property):
             instance.on_property_changed(self._name, None)
         return self._replace(fget=self.fget, fset=self.fset, fdel=new_deleter, doc=self.__doc__)
 
-class Number(DeviceProperty):
-    """
-    Represents a numeric property of a Home Assistant device.
-    """
-    def __init__(self, fget=None, fset=None, fdel=None, doc=None):
-        super().__init__(fget, fset, fdel, doc)
-        self.type: type = int
-        self.unit: str = ""
-        self.min: Optional[float] = None
-        self.max: Optional[float] = None
-        self.step: Optional[float] = None
-
-    def _copy_metadata_to(self, other: "Number") -> "Number":
-        super()._copy_metadata_to(other)
-        other.type = self.type
-        other.unit = self.unit
-        other.min = self.min
-        other.max = self.max
-        other.step = self.step
-        return other
-
-    def meta(self, device) -> dict:
-        """
-        Return metadata for number entity.
-        """
-        meta = {
-            "name": self.display_name or self._name,
-            "p": "number",
-            "unit_of_measurement": self.unit,
-            "state_topic": f"{device.root_topic}/{device.device_id}/{self._name.lower()}",
-            "unique_id": f"{device.device_id}_{self._name.lower()}",
-        }
-        if self.is_read_only is False:
-            meta["command_topic"] = f"{device.root_topic}/{device.device_id}/{self._name.lower()}/set"
-        if self.min is not None:
-            meta["min"] = self.min
-        if self.max is not None:
-            meta["max"] = self.max
-        if self.step is not None:
-            meta["step"] = self.step
-        return meta
-
-def number(value_type: type = int,
-           display_name: str = "",
-           unit: str = "",
-           min_value: Optional[float] = None, 
-           max_value: Optional[float] = None, 
-           step: Optional[float] = None):
-    """
-    Decorator to define a numeric property.
-    """
-    def decorator(func):
-        prop = Number(func)
-        prop.display_name = display_name
-        prop.type = value_type
-        prop.unit = unit
-        prop.min = min_value
-        prop.max = max_value
-        prop.step = step
-        return prop
-    return decorator
-
-class Temperature(DeviceProperty):
-    """
-    Represents a temperature property of a Home Assistant device.
-    """
-    def __init__(self, fget=None, fset=None, fdel=None, doc=None):
-        super().__init__(fget, fset, fdel, doc)
-        self.type: type = float
-        self.unit: str = "°C"
-
-    def _copy_metadata_to(self, other):
-        super()._copy_metadata_to(other)
-        other.type = self.type
-        other.unit = self.unit
-        return other
-
-    def meta(self, device) -> dict:
-        """
-        Return metadata for temperature entity.
-        """
-        return {
-            "name": self.display_name or self._name,
-            "p": "sensor",
-            "unit_of_measurement": self.unit,
-            "device_class": "temperature",
-            "state_topic": f"{device.root_topic}/{device.device_id}/{self._name.lower()}",
-            "unique_id": f"{device.device_id}_{self._name.lower()}",
-        }
-
-def temperature(unit: str = "°C", display_name: Optional[str] = None):
-    """
-    Decorator to define a temperature property.
-    """
-    def decorator(func):
-        prop = Temperature(func)
-        prop.unit = unit
-        prop.display_name = display_name
-        return prop
-    return decorator
 
 class DeviceMetaclass(type):
     """
@@ -251,18 +160,24 @@ class Device(metaclass=DeviceMetaclass):
                "mdl": f"{self.model}",
                "sw": f"{self.software_version}",
                "sn": self.serial_number,
-               "hw": f"{self.hardware_version}"}
+               "hw": f"{self.hardware_version}",
+               }
 
         o = {"name": f"{self.origin}", 
              "sw": f"{self.software_version}", 
              "url": f"{self.support_url}"}
 
-        cmps = {f"{self.device_id}_{n}": c.meta(self) for n, c in self.components.items()}
+        cmps = {f"{self.device_id}_{n}": c.discovery_payload(self) for n, c in self.components.items()}
         return {"dev": dev, 
                 "o": o, 
                 "cmps": cmps, 
                 "state_topic": f"{self.device_id}/state", 
                 "qos": 0 }
+
+    @property
+    def availability_topic(self) -> str:
+        """Generate MQTT topic for device availability."""
+        return f"{self.root_topic}/{self.device_id}/availability"
 
     @property
     def value_topic(self) -> str:
@@ -273,7 +188,7 @@ class Device(metaclass=DeviceMetaclass):
     def payloads(self):
         """Publish the values to mqtt server."""
         components = self.__class__.__dict__.get("components", {})
-        payloads =  [(f"{self.root_topic}/{self.device_id}/{k}", v.fget(self))
+        payloads =  [(f"{self.root_topic}/{self.device_id}/{k.lower()}/state", v.serialize(v.fget(self)))
                      for k, v in components.items()]
         return payloads
 
@@ -285,7 +200,7 @@ class Device(metaclass=DeviceMetaclass):
         def create_setter(prop):
             def s(payload):
                 print("Setting property via MQTT:", payload)
-                prop.fset(self, prop.type(payload))
+                prop.fset(self, prop.parse(payload))
             return s
 
         for name, prop in self.components.items():
@@ -300,8 +215,11 @@ class Device(metaclass=DeviceMetaclass):
         """Callback when a property value changes."""
         print(f"Property changed: {name}, New Value: {value}")
         if self.manager and self.manager.mqtt_client:
-            topic = f"{self.root_topic}/{self.device_id}/{name.lower()}"
-            payload = value
+            prop = self.components.get(name)
+            if prop is None:
+                return
+            topic = f"{self.root_topic}/{self.device_id}/{name.lower()}/state"
+            payload = prop.serialize(value)
             try:
                 self.manager.mqtt_client.publish(topic, str(payload), qos=0, retain=False)
                 print(f"Published updated value to {topic}: {payload}")
