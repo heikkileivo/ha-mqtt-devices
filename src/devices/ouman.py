@@ -162,7 +162,7 @@ class Ouman(Device):
         ack = self.__serio.read()
         if ack != self.ACK:
             debug('serio failed: %s', ack)
-            return None<
+            return None
 
         datalen = self.__serio.read()
         try:
