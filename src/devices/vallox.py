@@ -944,26 +944,28 @@ class Vallox(Device):
                 print(f"[DEBUG] {message}")
 
 
-async def poll_device(state: LoopState, device: Vallox):
-    """Poll data from the vallox device."""
-    print("Starting polling task...")
+    async def poll_device(self, state: LoopState):
+        """Poll data from the vallox device."""
+        print("Starting polling Vallox device...")
 
-    if device.connect():
-        print("Connected to Vallox device.")
+        if self.connect():
+            print("Connected to Vallox device.")
 
-    while not state.stop.is_set():
-        device.loop()
-        await asyncio.sleep(0.1)
-    print("Polling task stopped.")
+        while not state.stop.is_set():
+            self.loop()
+            await asyncio.sleep(0.1)
+
+        self.disconnect()
+        print("Polling Vallox device stopped.")
 
 def create_devices():
     """Create and return a list of vallox devices and their polling functions."""
     port = env.get("VALLOX_SERIAL_PORT", "/dev/ttyUSB0")
     debug = env.get("VALLOX_DEBUG", "false").lower() == "true"
-    return [(Vallox(root_topic="ventilation",
+    return [Vallox(root_topic="ventilation",
                     port=port,
                     baudrate=9600,
-                    debug=debug), poll_device)]
+                    debug=debug)]
 
 
 

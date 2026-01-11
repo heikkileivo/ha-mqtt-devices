@@ -67,21 +67,21 @@ class TestDevice(Device):
 
 
 
-async def poll_device(state: LoopState, device: TestDevice):
-    """Poll data from the device."""
-    print("Starting polling task...")
-    while not state.stop.is_set():
-        # Placeholder for polling logic
-        if device.power_state:
-            device.temperature += 0.1  # Simulate temperature change
+    async def poll_device(self, state: LoopState):
+        """Poll data from the device."""
+        print("Starting polling task...")
+        while not state.stop.is_set():
+            # Placeholder for polling logic
+            if self.power_state:
+                self.temperature += 0.1  # Simulate temperature change
 
-        print("Polling device...")
-        await asyncio.sleep(5)  # Simulate polling 
-    print("Polling task stopped.")
+            print("Polling device...")
+            await asyncio.sleep(5)  # Simulate polling 
+        print("Polling task stopped.")
 
 def create_devices():
     """Create and return a list of test devices and their polling functions."""
-    return [(TestDevice(root_topic="test_devices"), poll_device)]
+    return [TestDevice(root_topic="test_devices")]
 
 if __name__ == "__main__":
     import json

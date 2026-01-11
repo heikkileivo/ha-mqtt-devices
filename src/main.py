@@ -12,7 +12,7 @@ from core import DeviceManager, Device
 from core import LoopState
 from core import misc_task, mqtt_supervisor
 
-create_devices: List[Callable[[], List[Tuple[Device, Callable]]]] = []
+create_devices: List[Callable[[], List[Device]]] = []
 
 async def run_tasks(state: LoopState):
     """Create asyncio tasks for the main loop."""
@@ -41,9 +41,9 @@ async def run_tasks(state: LoopState):
 
     for create_devices_func in create_devices:
         devices = create_devices_func()
-        for device, task in devices:  
+        for device in devices:  
             state.device_manager.add_device(device)
-            tasks.append(asyncio.create_task(task(state, device)))
+            tasks.append(asyncio.create_task(device.poll_device(state)))
 
     await asyncio.gather(*tasks)
 
