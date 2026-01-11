@@ -7,7 +7,7 @@ from logging import debug
 import serial
 from core import Device
 from core.loopstate import LoopState
-from core.sensors import temperature
+from core.sensors import temperature, numeric, binary
 
 
 class MeasurePoint:
@@ -357,17 +357,17 @@ class OumanEH203(Ouman):
         """Return the state of relay 2."""
         return self.__measurepoints['relay2'].value
     
-    @property
+    @numeric(unit="%", display_name="H1 Valve Position")
     def valve1_position(self):
         """Return the H1 valve position measure point value."""
         return self.__measurepoints['h1_valve_position'].value
     
-    @property
+    @numeric(unit="%", display_name="H2 Valve Position")
     def valve2_position(self):
         """Return the H2 valve position measure point value."""
         return self.__measurepoints['h2_valve_position'].value
     
-    @property
+    @numeric(unit="%", display_name="HW Valve Position")
     def hw_valve_position(self):
         """Return the HW valve position measure point value."""
         return self.__measurepoints['hw_valve_position'].value
