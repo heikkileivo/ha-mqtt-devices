@@ -310,12 +310,12 @@ class OumanEH203(Ouman):
         """Return the measurement 6 measure point value."""
         return self.__measurepoints['measurement_6'].value
     
-    @property
+    @temperature(unit="°C", display_name="HW Supply Temperature")
     def hw_supply_temperature(self):
         """Return the HW supply temperature measure point value."""
         return self.__measurepoints['hw_supply_temperature'].value
     
-    @property
+    @temperature(unit="°C", display_name="HW Circulation Temperature")
     def hw_circulation_temperature(self):
         """Return the HW circulation temperature measure point value."""
         return self.__measurepoints['hw_circulation_temperature'].value
