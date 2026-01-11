@@ -143,6 +143,7 @@ class Ouman(Device):
     
     def read_all(self):
         """Read all measure points from the Ouman device."""
+        print(f"Reading {len(self.__measurepoints)} measure points...")
         for mp in self.__measurepoints.values():
             mp.read()
 
@@ -213,8 +214,12 @@ class Ouman(Device):
         """Poll data from the device."""
         print("Starting Ouman polling task...")
         try:
-            self.connect(env.get("OUMAN_SERIAL_PORT", "/dev/ttyUSB0"))
+
+            port = env.get("OUMAN_SERIAL_PORT", "/dev/ttyUSB0")
+            print(f"Connecting Ouman device on port {port}...")
+            self.connect(port)
             print("Ouman device connected.")
+
             await asyncio.sleep(2)  # Wait for the connection to stabilize
         except Exception as e:
             print(f"Failed to connect to Ouman device: {e}")
