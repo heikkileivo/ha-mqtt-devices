@@ -60,6 +60,6 @@ class DeviceManager:
         try:
             for device in self.devices.values():
                 for topic, payload in device.payloads:
-                    self.mqtt_client.publish(topic, json.dumps(payload), qos=0, retain=False)
+                    self.mqtt_client.publish(topic, str(payload), qos=0, retain=False)
         except Exception as e:
             print(f"Error publishing payloads: {e}")
