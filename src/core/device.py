@@ -188,8 +188,9 @@ class Device(metaclass=DeviceMetaclass):
     def payloads(self):
         """Publish the values to mqtt server."""
         components = self.__class__.__dict__.get("components", {})
-        payloads =  [(f"{self.root_topic}/{self.device_id}/{k.lower()}/state", v.serialize(v.fget(self)))
+        payloads =  [(f"{self.root_topic}/{self.device_id}/{k.lower()}/state", v.serialize(v.fget(self)) if v.fget(self) else None)
                      for k, v in components.items()]
+        payloads = [(t, p) for t, p in payloads if p is not None]
         return payloads
 
     @property
@@ -212,7 +213,9 @@ class Device(metaclass=DeviceMetaclass):
         return subs
 
     def on_property_changed(self, name, value):
-        """Callback when a property value changes."""
+        """Callback when a property value changes."""¨
+        if value is None:
+            return
         print(f"Property changed: {name}, New Value: {value}")
         if self.manager and self.manager.mqtt_client:
             prop = self.components.get(name)
