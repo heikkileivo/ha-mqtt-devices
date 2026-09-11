@@ -1,4 +1,5 @@
 """Device Manager for handling multiple devices."""
+import asyncio
 import json
 from typing import Dict
 from .device import Device
@@ -7,6 +8,10 @@ class DeviceManager:
     """
     Manages multiple devices.
     """
+    # Delay between re-sending discovery and states after Home Assistant comes online,
+    # so that the entities have been set up and subscribed before their states arrive.
+    STATE_REPUBLISH_DELAY = 5.0
+
     def __init__(self):
         self.devices: Dict[str, Device] = {}
         self.subscriptions = {}
@@ -39,6 +44,20 @@ class DeviceManager:
                 self.subscriptions[topic] = setter
                 self.mqtt_client.subscribe(topic)
 
+        # Home Assistant publishes its birth message to <discovery_prefix>/status when it (re)starts
+        for prefix in {device.discovery_prefix for device in self.devices.values()}:
+            topic = f"{prefix}/status"
+            self.subscriptions[topic] = self.handle_home_assistant_status
+            self.mqtt_client.subscribe(topic)
+
+    def handle_home_assistant_status(self, payload: str):
+        """Re-send discovery and states when Home Assistant comes online, as states are not retained."""
+        if payload != "online":
+            return
+        print("Home Assistant is online, re-publishing discovery topics and states.")
+        self.publish_discovery_topics()
+        asyncio.get_running_loop().call_later(self.STATE_REPUBLISH_DELAY, self.publish_all)
+
     def publish_discovery_topics(self):
         """Publish all discovery topics."""
         if self.mqtt_client is None:
@@ -57,6 +76,8 @@ class DeviceManager:
 
     def publish_all(self):
         """Publish all device payloads."""
+        if self.mqtt_client is None:
+            return
         try:
             for device in self.devices.values():
                 for topic, payload in device.payloads:
