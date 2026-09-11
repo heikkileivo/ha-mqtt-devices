@@ -198,27 +198,27 @@ class Vallox(Device):
     @temperature(unit="°C", display_name="Inside Temperature")
     def inside_temp(self) -> int:
         """Get inside temperature in Celsius"""
-        return self.data['inside_temp'].value if self.data['inside_temp'].value is not None else 0
+        return self.data['inside_temp'].value
 
     @temperature(unit="°C", display_name="Outside Temperature")
     def outside_temp(self) -> int:
         """Get outside temperature in Celsius"""
-        return self.data['outside_temp'].value if self.data['outside_temp'].value is not None else 0
+        return self.data['outside_temp'].value
 
     @temperature(unit="°C", display_name="Incoming Temperature")
     def incoming_temp(self) -> int:
         """Get incoming air temperature in Celsius"""
-        return self.data['incoming_temp'].value if self.data['incoming_temp'].value is not None else 0
+        return self.data['incoming_temp'].value
 
     @temperature(unit="°C",display_name="Exhaust Temperature")
     def exhaust_temp(self) -> int:
         """Get exhaust air temperature in Celsius"""
-        return self.data['exhaust_temp'].value if self.data['exhaust_temp'].value is not None else 0
+        return self.data['exhaust_temp'].value
 
     @switch(display_name="Unit Power State")
     def is_on(self) -> bool:
         """Check if unit is powered on"""
-        return self.data['is_on'].value or False
+        return self.data['is_on'].value
     
     @is_on.setter
     def is_on(self, value: bool):
@@ -231,7 +231,7 @@ class Vallox(Device):
     @switch(display_name="RH Mode Active")
     def is_rh_mode(self) -> bool:
         """Check if RH (humidity) mode is active"""
-        return self.data['is_rh_mode'].value or False
+        return self.data['is_rh_mode'].value
 
     @is_rh_mode.setter
     def is_rh_mode(self, value: bool):
@@ -244,7 +244,7 @@ class Vallox(Device):
     @switch(display_name="Heating Mode Active")
     def is_heating_mode(self) -> bool:
         """Check if heating mode is active"""
-        return self.data['is_heating_mode'].value or False
+        return self.data['is_heating_mode'].value
     
     @is_heating_mode.setter
     def is_heating_mode(self, value: bool):
@@ -257,57 +257,57 @@ class Vallox(Device):
     @binary(display_name="Summer Mode Active", device_class="power")
     def is_summer_mode(self) -> bool:
         """Check if summer mode is active"""
-        return self.data['is_summer_mode'].value or False
+        return self.data['is_summer_mode'].value
 
     @binary(display_name="Error Relay Active", device_class="problem")
     def is_error_relay(self) -> bool:
         """Check if error relay is active"""
-        return self.data['is_error_relay'].value or False
+        return self.data['is_error_relay'].value
 
     @binary(display_name="Intake Motor Running", device_class="power")
     def is_motor_in(self) -> bool:
         """Check if intake motor is running"""
-        return self.data['is_motor_in'].value or False
+        return self.data['is_motor_in'].value
 
     @binary(display_name="Front Heating Active", device_class="heat")
     def is_front_heating(self) -> bool:
         """Check if front heating is active"""
-        return self.data['is_front_heating'].value or False
+        return self.data['is_front_heating'].value
 
     @binary(display_name="Exhaust Motor Running", device_class="power")
     def is_motor_out(self) -> bool:
         """Check if exhaust motor is running"""
-        return self.data['is_motor_out'].value or False
+        return self.data['is_motor_out'].value
 
     @binary(display_name="Extra Function Active", device_class="power")
     def is_extra_func(self) -> bool:
         """Check if extra function is active"""
-        return self.data['is_extra_func'].value or False
+        return self.data['is_extra_func'].value
 
     @binary(display_name="Filter Warning", device_class="problem")
     def is_filter(self) -> bool:
         """Check if filter warning is active"""
-        return self.data['is_filter'].value or False
+        return self.data['is_filter'].value
 
     @binary(display_name="Heating Active", device_class="heat")
     def is_heating(self) -> bool:
         """Check if heating is active"""
-        return self.data['is_heating'].value or False
+        return self.data['is_heating'].value
 
     @binary(display_name="Fault Present", device_class="problem")
     def is_fault(self) -> bool:
         """Check if fault is present"""
-        return self.data['is_fault'].value or False
+        return self.data['is_fault'].value
 
     @binary(display_name="Service Needed", device_class="problem")
     def is_service_needed(self) -> bool:
         """Check if service is needed"""
-        return self.data['is_service_needed'].value or False
+        return self.data['is_service_needed'].value
 
     @switch(display_name="Boost/Fireplace Switch Active")
     def is_switch_active(self) -> bool:
         """Check if boost/fireplace switch is active"""
-        return self.data['is_switch_active'].value or False
+        return self.data['is_switch_active'].value
     
     @is_switch_active.setter
     def is_switch_active(self, value: bool):
@@ -352,7 +352,7 @@ class Vallox(Device):
     @number(min_value=1, max_value=5, step=1, display_name="Fan Speed")
     def fan_speed(self) -> int:
         """Get current fan speed (1-8)"""
-        return self.data['fan_speed'].value if self.data['fan_speed'].value is not None else vp.NOT_SET
+        return self.data['fan_speed'].value
 
     @fan_speed.setter
     def fan_speed(self, speed: int):
@@ -378,7 +378,7 @@ class Vallox(Device):
     @number(min_value=1, max_value=12, step=1, display_name="Service Period (Months)")
     def service_period(self) -> int:
         """Get service period in months"""
-        return self.data['service_period'].value if self.data['service_period'].value is not None else vp.NOT_SET
+        return self.data['service_period'].value
 
     @service_period.setter
     def service_period(self, months: int):
@@ -404,7 +404,7 @@ class Vallox(Device):
     @number(min_value=10, max_value=27, step=1, display_name="Heating Target Temperature (°C)")
     def heating_target(self) -> int:
         """Get heating target temperature in Celsius"""
-        return self.data['heating_target'].value if self.data['heating_target'].value is not None else vp.NOT_SET
+        return self.data['heating_target'].value
 
     @heating_target.setter
     def heating_target(self, celsius: int):
@@ -616,6 +616,7 @@ class Vallox(Device):
         if not self.full_init_done:
             self.full_init_done = self._is_status_init_done()
             if self.full_init_done:
+                self.on_property_changed('init_ok', True)
                 for k, _ in self.data.items():
                     self._call_status_changed(k)
 
