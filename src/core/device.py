@@ -188,9 +188,12 @@ class Device(metaclass=DeviceMetaclass):
     def payloads(self):
         """Publish the values to mqtt server."""
         components = self.__class__.__dict__.get("components", {})
-        payloads =  [(f"{self.root_topic}/{self.device_id}/{k.lower()}/state", v.serialize(v.fget(self)) if v.fget(self) else None)
-                     for k, v in components.items()]
-        payloads = [(t, p) for t, p in payloads if p is not None]
+        payloads = []
+        for k, v in components.items():
+            value = v.fget(self)
+            # Only skip values that are not yet known; False and 0 are valid states
+            if value is not None:
+                payloads.append((f"{self.root_topic}/{self.device_id}/{k.lower()}/state", v.serialize(value)))
         return payloads
 
     @property
