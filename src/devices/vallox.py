@@ -670,11 +670,11 @@ class Vallox(Device):
         self._check_status_change('is_error_relay', 
                                  (variable08 & vp.VX_08_FLAG_ERROR_RELAY) != 0)
         self._check_status_change('is_motor_in', 
-                                 (variable08 & vp.VX_08_FLAG_MOTOR_IN) != 0)
+                                 (variable08 & vp.VX_08_FLAG_MOTOR_IN) == 0)  # active low: 1 = motor off
         self._check_status_change('is_front_heating', 
                                  (variable08 & vp.VX_08_FLAG_FRONT_HEATING) != 0)
         self._check_status_change('is_motor_out', 
-                                 (variable08 & vp.VX_08_FLAG_MOTOR_OUT) != 0)
+                                 (variable08 & vp.VX_08_FLAG_MOTOR_OUT) == 0)  # active low: 1 = motor off
         self._check_status_change('is_extra_func', 
                                  (variable08 & vp.VX_08_FLAG_EXTRA_FUNC) != 0)
 
